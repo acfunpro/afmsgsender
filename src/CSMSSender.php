@@ -19,14 +19,16 @@ class CSMSSender extends CSMSSenderConst
 
 	//	...
 	const DEFAULT_SERVICE_URL		= 'http://msgsender.service.acfun.tv/sms';
-	const DEFAULT_SERVICE_TIMEOUT		=  5;		//	in seconds
-	const DEFAULT_SERVICE_VERSION		=  '1.0';	//	default version
+	const DEFAULT_SERVICE_TIMEOUT	=  5;		//	in seconds
+	const DEFAULT_SERVICE_VERSION	=  '1.0';	//	default version
 
 
 	//
 	//	static
 	//
-	private static $g_cStaticInstance;
+	private static $serviceConfig 		= [];
+	private static $templateConfig 		= [];
+	private static $g_cStaticService 	= null;
 
 	//
 	//	private
@@ -39,16 +41,46 @@ class CSMSSender extends CSMSSenderConst
 	{
 		$this->m_sServiceUrl		= self::DEFAULT_SERVICE_URL;
 		$this->m_sServiceTimeout	= self::DEFAULT_SERVICE_TIMEOUT;
-	}
-	public static function GetInstance()
-	{
-		if ( is_null( self::$g_cStaticInstance ) || ! isset( self::$g_cStaticInstance ) )
-		{
-			self::$g_cStaticInstance = new self();
-		}
-		return self::$g_cStaticInstance;
+		$this->_initServiceConfig(config('msgsender.service', []));
+		$this->_initTemplateConfig(config('msgsender.template', []));
 	}
 
+	//
+	//	initialization service Configuration
+	//
+	private function _initServiceConfig($serviceConfig)
+	{
+       if (!is_array($serviceConfig) || !count($serviceConfig))
+            return CConst::SERVICE_CONFIG_ERROR;
+
+        self::$serviceConfig = $serviceConfig;
+	}
+
+	//
+	//	initialization template Configuration
+	//
+	private function _initTemplateConfig($templateConfig)
+	{
+       if (!is_array($templateConfig) || !count($templateConfig))
+            return CConst::TEMPLATE_CONFIG_ERROR;
+
+        self::$templateConfig = $templateConfig;
+	}
+
+	/**
+	 * Service instance
+	 * @param  string $serviceName (Alidayu/Welink)
+	 * @return object
+	 */
+	public static function useService($serviceName)
+	{
+        $className = 'acfunpro\\afmsgsender\\service\\' . $serviceName . 'Service';
+
+        if (null !== self::$g_cStaticService && self::$g_cStaticService instanceof $className)
+            return self::$g_cStaticService;
+
+        return self::$g_cStaticService = new $className;
+	}
 
 	//
 	//	Set services url
@@ -94,12 +126,13 @@ class CSMSSender extends CSMSSenderConst
 	//
 	//	send verification code
 	//
-	public function SendVerifyCode( $sMobileNumber, $sCode, $sApiKey, $sVersion = self::DEFAULT_SERVICE_VERSION )
+	public function SendVerifyCode( $sMobileNumber, $sCode, $sType, $sApiKey, $sVersion = self::DEFAULT_SERVICE_VERSION )
 	{
 		//
 		//	nChannel	- [in] int	channel
 		//	sMobileNumber	- [in] string
 		//	sCode		- [in] array	verify code
+		//	sType       - [in] string   template type
 		//	sApiKey		- [in] string	api key
 		//	sVersion	- [in] string	required service version
 		//	RETURN		- error id
@@ -127,7 +160,7 @@ class CSMSSender extends CSMSSenderConst
 			if ( CLib::IsValidMobile ( $sMobileNumber , true ) )
 			{
 				$arrResponse	= [];
-				$arrPostData	= $this->_GetPostDataByAliDaYu( $sMobileNumber, $sCode, $sApiKey );
+				$arrPostData	= $this->_GetPostDataByAliDaYu( $sMobileNumber, $sCode, $sType, $sApiKey );
 				$sVersion	= ( CLib::IsExistingString( $sVersion, true ) ? trim( $sVersion ) : self::DEFAULT_SERVICE_VERSION );
 				$nRpcCall	= $cRequest->Post
 				(
@@ -168,8 +201,6 @@ class CSMSSender extends CSMSSenderConst
 		return $nRet;
 	}
 
-
-
 	////////////////////////////////////////////////////////////////////////////////
 	//	Private
 	//
@@ -177,8 +208,36 @@ class CSMSSender extends CSMSSenderConst
 	//
 	//	阿里大鱼数据格式
 	//
-	private function _GetPostDataByAliDaYu( $sMobileNumber, $sCode, $sApiKey )
+	private function _GetPostDataByAliDaYu( $sMobileNumber, $sCode, $sType, $sApiKey )
 	{
+		$param['mobile'] 	 = $sMobileNumber;
+		$param['code']	     = $sCode;
+		$param['templateId'] = self::$templateConfig[$sType]['templateId'];
+
+		$service = $this->useService('Alidayu');
+		$service->response($param);
+		return
+		[
+			'mobile'	=> strval( $sMobileNumber ),
+			'code'		=> $sCode,
+			'apikey'	=> $sApiKey,
+		];
+	}
+
+	////////////////////////////////////////////////////////////////////////////////
+	//	Private
+	//
+
+	//
+	//	微网数据格式
+	//
+	private function _GetPostDataByWeLink( $sMobileNumber, $sType, $sCode, $sApiKey )
+	{
+		$param['mobile'] = $sMobileNumber;
+		$param['content'] = sprintf(self::$templateConfig[$sType]['content'], $sCode);
+
+		$service = $this->useService('Welink');
+		$service->response($param);
 		return
 		[
 			'mobile'	=> strval( $sMobileNumber ),
