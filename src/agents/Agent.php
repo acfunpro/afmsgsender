@@ -1,8 +1,8 @@
 <?php
 
-namespace acfunpro\afmsgsender\service;
+namespace acfunpro\afmsgsender\agents;
 
-abstract class Service
+abstract class Agent
 {
     /**
      * Constructs request parameter

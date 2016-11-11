@@ -1,69 +1,67 @@
 <?php
 
-namespace acfunpro\afmsgsender\service;
+namespace acfunpro\afmsgsender\agents;
 
-use acfunpro\afmsgsender\service\service;
+use acfunpro\afmsgsender\agents\Agent;
 
-class AlidayuService extends Service
+class AlidayuAgent extends Agent
 {
-    protected $config = [];
-
     /**
-     * Request address
+     * 请求地址
      * @var string
      */
     protected $url;
 
     /**
-     * App key
+     * 应用的App Key
      * @var string
      */
     protected $appKey;
 
     /**
-     * App secret
+     * 应用的密匙
      * @var string
      */
     protected $secretKey;
 
     /**
-     * Api version
+     * api协议版本
      * @var string
      */
     protected $apiVersion;
 
     /**
-     * Response format （Default：xml Optional：xml json）
+     * 响应格式 默认为xml 可选值:xml json
      * @var string
      */
     protected $format;
 
     /**
-     * Api method name
+     * api接口名称
      * @var string
      */
     protected $method;
 
     /**
-     * Signature algorithm  （Optional：hmac md5）
+     * 签名的摘要算法 可选值:hmac md5
      * @var string
      */
     protected $signMethod;
 
     /**
-     * SMS free sign name
+     * 短信签名
      * @var string
      */
     protected $smsFreeSignName;
 
 
+
     public function __construct()
     {
-        $this->config           = config('message.service.Alidayu');
-        $this->url              = $this->config['sendUrl'];
-        $this->appKey           = $this->config['appKey'];
-        $this->secretKey        = $this->config['secretKey'];
-        $this->smsFreeSignName  = $this->config['smsFreeSignName'];
+        $this->url              = config('message.agent.Alidayu.sendUrl');
+        $this->appKey           = config('message.agent.Alidayu.appKey');
+        $this->secretKey        = config('message.agent.Alidayu.secretKey');
+        $this->smsFreeSignName  = config('message.agent.Alidayu.smsFreeSignName');
         $this->method           = 'alibaba.aliqin.fc.sms.num.send';
         $this->apiVersion       = '2.0';
         $this->format           = 'json';
@@ -71,7 +69,7 @@ class AlidayuService extends Service
     }
 
     /**
-     * Generate sign
+     * 生成签名信息
      * @param $params
      * @return mixed
      */
@@ -93,40 +91,42 @@ class AlidayuService extends Service
         return strtoupper(md5($stringToBeSigned));
     }
 
-    public function createParams(array $params)
+    public function createParams(array $data)
     {
-        // System params
-        $sysParams['method']        = $this->method;
-        $sysParams['app_key']       = $this->appKey;
-        $sysParams['v']             = $this->apiVersion;
-        $sysParams['format']        = $this->format;
-        $sysParams['sign_method']   = $this->signMethod;
-        $sysParams['timestamp']     = date('Y-m-d H:i:s');
+        // 组装系统参数
+        $sysParams['method'] = $this->method;
+        $sysParams['app_key'] = $this->appKey;
+        $sysParams['v'] = $this->apiVersion;
+        $sysParams['format'] = $this->format;
+        $sysParams['sign_method'] = 'md5';
+        $sysParams['timestamp'] = date('Y-m-d H:i:s');
 
-        // Api request params
+        // 组装请求参数
         $apiParams['sms_type']           = 'normal';
         $apiParams['rec_num']            = $data['mobile'];
-        $apiParams['sms_template_code']  = $data['templateId'];
+        $apiParams['sms_template_code']  = 'SMS_25645114';
         $apiParams['sms_free_sign_name'] = $this->smsFreeSignName;
         $apiParams['sms_param']          = $this->getTempDataString($data);
 
+        // 签名
         $sysParams['sign'] = $this->generateSign(array_merge($sysParams, $apiParams));
 
         return array_merge($sysParams, $apiParams);
     }
 
-    public function request(array $params)
+    public function request(array $data)
     {
-        $params = $this->createParams($params);
+        $params = $this->createParams($data);
         $result = $this->curl($this->url, $params, true);
         return $result;
     }
 
-    public function response(array $params)
+    public function response(array $data)
     {
-        $callBackName = $this->genResponseName($this->method);
+        $callBackName = $this->getResponseName($this->method);
 
-        $response = $this->request($params);
+        $response = $this->request($data);
+
         if ($response['request']) {
             $result = json_decode($response['response'], true);
             if (isset($result[$callBackName]['result'])) {
@@ -134,7 +134,7 @@ class AlidayuService extends Service
             } elseif (isset($result['error_response'])) {
                 $result = $result['error_response'];
             } else {
-                $result = '请求失败';
+                $result = ['error_code' => 400, 'msg' => 'request fail'];
             }
         }
 
@@ -150,7 +150,7 @@ class AlidayuService extends Service
         return json_encode($data);
     }
 
-    protected function genResponseName($method)
+    protected function getResponseName($method)
     {
         return str_replace('.', '_', $method) . '_response';
     }

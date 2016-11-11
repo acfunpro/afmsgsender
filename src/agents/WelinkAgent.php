@@ -1,10 +1,10 @@
 <?php
 
-namespace acfunpro\afmsgsender\service;
+namespace acfunpro\afmsgsender\agents;
 
-use acfunpro\afmsgsender\service\service;
+use acfunpro\afmsgsender\agents\Agent;
 
-class WelinkService extends Service
+class WelinkAgent extends Agent
 {
     protected $config = [];
 
@@ -22,7 +22,7 @@ class WelinkService extends Service
 
     public function __construct()
     {
-        $this->config = config('message.service.Welink');
+        $this->config = config('message.agent.Welink');
         $this->url = $this->config['url'];
         $this->sname = $this->config['sname'];
         $this->spwd = $this->config['spwd'];
@@ -33,7 +33,7 @@ class WelinkService extends Service
 
     public function createParams(array $params)
     {
-        $params = "sname".$this->sname."&spwd=".$this->spwd."&scorpid=&sprdid=".$this->sprdid."&sdst=".$params['mobile']."&smsg=".rawurldecode($params['content'].$this->sign);
+        $params = "sname=".$this->sname."&spwd=".$this->spwd."&scorpid=&sprdid=".$this->sprdid."&sdst=".$params['mobile']."&smsg=".rawurldecode($params['content'].$this->sign);
 
         return $params;
     }
@@ -70,12 +70,13 @@ class WelinkService extends Service
     public function response(array $params)
     {
         $response = $this->request($params);
+
         // 禁止引用外部xml实体
         libxml_disable_entity_loader(true);
 
-        $xmlstring = simplexml_load_string($response, 'SimpleXMLElement', LIBXML_NOCDATA);
-        $val = json_decode(json_encode($xmlstring),true);
-        return $val;
-    }
+        $xml = simplexml_load_string((string)$response, 'SimpleXMLElement', LIBXML_NOCDATA);
+        $result = json_decode(json_encode($xml),true);
 
+        return $result;
+    }
 }
