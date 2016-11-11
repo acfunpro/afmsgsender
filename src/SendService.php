@@ -11,7 +11,7 @@ class SendService
 
 	const DEFAULT_SERVICE_VERSION 	= '1.0';
 
-	const DEFAULT_SERVICE_URL 		= 'http://msgsender.service.acfun.tv';
+	const DEFAULT_SERVICE_URL 		= 'http://sms.app';
 
 	private $_sServiceUrl;
 	private $_nServiceTimeOut;
@@ -25,7 +25,7 @@ class SendService
 	public function email($email, $username, $type, $method = 'POST')
 	{
 		$arrResponse = [];
-
+		$cRequest = new cRequest();
 		$arrPostData = [
 			'method' 	=> $method,
 			'url'	 	=> $this->_sServiceUrl . '/emailsender',
@@ -38,13 +38,17 @@ class SendService
 			'version'	=> self::DEFAULT_SERVICE_VERSION,
 		];
 
-		return $cRequest->Post($arrPostData, $arrResponse);
+		$cRequest->Post($arrPostData, $arrResponse);
+
+		return $arrResponse;
 
 	}
 
 	public function message($mobile, $code, $type, $apiKey, $method = 'POST')
 	{
 		$arrResponse = [];
+
+		$cRequest = new cRequest();
 
 		$arrPostData = [
 			'method' 	=> $method,
@@ -59,7 +63,9 @@ class SendService
 			'version'	=> self::DEFAULT_SERVICE_VERSION,
 		];
 
-		return $cRequest->Post($arrPostData, $arrResponse);
+		$cRequest->Post($arrPostData, $arrResponse);
+
+		return $arrResponse;
 
 	}
 
@@ -73,7 +79,7 @@ class SendService
 			$this->_sServiceUrl = $sUrl;
 		}
 
-		return $bRes
+		return $bRes;
 	}
 
 	public function setSetviceTimeOut($nTimeout)
@@ -86,7 +92,7 @@ class SendService
 			$this->_nServiceTimeOut = $nTimeout;
 		}
 
-		$return $bRes;
+		return $bRes;
 	}
 
 }
