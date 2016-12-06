@@ -78,12 +78,13 @@ class CMailSender extends CMsgSenderConst
 	}
 
 
-	public function SendMail( $sMailAddress, $sSubject, $sBody )
+	public function SendMail( $sMailAddress, $sSubject, $sBody, $sApiKey )
 	{
 		//
 		// sMailAddress			-[in] string
 		// sSubject 			-[in] string
 		// sBody 				-[in] string
+		// sApiKey				-[in] string
 		//
 		$nRet		= CConst::ERROR_UNKNOWN;
 		$cRequest	= CRequest::GetInstance();
