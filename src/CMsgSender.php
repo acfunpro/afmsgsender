@@ -93,15 +93,15 @@ class CMsgSender extends CMsgSenderConst
 		//
 		// Verify parameter
 		//
-		if ( CLib::IsExistingString( $sMobileNumber ) )
+		if ( ! CLib::IsExistingString( $sMobileNumber ) )
 		{
 			return CConst::ERROR_PARAMETER;
 		}
-		if ( CLib::IsExistingString( $sMessage ) )
+		if ( ! CLib::IsExistingString( $sMessage ) )
 		{
 			return CConst::ERROR_PARAMETER;
 		}
-		if ( CLib::IsExistingString( $sApiKey ) )
+		if ( ! CLib::IsExistingString( $sApiKey ) )
 		{
 			return CConst::ERROR_PARAMETER;
 		}
