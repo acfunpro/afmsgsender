@@ -92,15 +92,15 @@ class CMailSender extends CMsgSenderConst
 		//
 		// Verify parameter
 		//
-		if ( CLib::IsExistingString( $sMailAddress ) )
+		if ( ! CLib::IsExistingString( $sMailAddress ) )
 		{
 			return CConst::ERROR_PARAMETER;
 		}
-		if ( CLib::IsExistingString( $sSubject ) )
+		if ( ! CLib::IsExistingString( $sSubject ) )
 		{
 			return CConst::ERROR_PARAMETER;
 		}
-		if ( CLib::IsExistingString( $sBody ) )
+		if ( ! CLib::IsExistingString( $sBody ) )
 		{
 			return CConst::ERROR_PARAMETER;
 		}
