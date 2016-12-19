@@ -111,7 +111,7 @@ class CMailSender extends CMsgSenderConst
 			{
 				$arrResponse	= [];
 				$arrPostData	= [
-					'url'		=> $this->_sServiceUrl,
+					'url'		=> $this->m_sServiceUrl,
 					'version'	=> $this->m_sVersion,
 					'timeout'	=> $this->m_nTimeOut,
 					'data'		=> [
