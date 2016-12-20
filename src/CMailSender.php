@@ -117,7 +117,8 @@ class CMailSender extends CMsgSenderConst
 					'data'		=> [
 						'email'		=>  $sMailAddress,
 						'subject'	=>	$sSubject,
-						'body'		=>	$sBody
+						'body'		=>	$sBody,
+						'apikey'	=> $sApiKey
 					]
 				];
 
