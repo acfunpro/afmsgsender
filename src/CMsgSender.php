@@ -12,7 +12,7 @@ class CMsgSender extends CMsgSenderConst
 
 	const DEFAULT_SERVICE_VERSION 	= '1.0';
 
-	const DEFAULT_SERVICE_URL 		= 'http://msgsender.service.acfun.tv/sendmsg';
+	const DEFAULT_SERVICE_URL 		= 'http://msgsender.service.acfun.cn/sendmsg';
 
 	private $m_sVersion;
 	private $m_sServiceUrl;
