@@ -12,7 +12,7 @@ class CMailSender extends CMsgSenderConst
 
 	const DEFAULT_SERVICE_VERSION 	= '1.0';
 
-	const DEFAULT_SERVICE_URL 		= 'http://msgsender.service.acfun.tv/sendemail';
+	const DEFAULT_SERVICE_URL 		= 'http://msgsender.service.acfun.cn/sendemail';
 
 	private $m_sVersion;
 	private $m_sServiceUrl;
@@ -107,7 +107,7 @@ class CMailSender extends CMsgSenderConst
 
 		try
 		{
-			if ( CLib::IsValidEMail( $sMailAddress, true, true ) )
+			if ( CLib::IsValidEMail( $sMailAddress, false, true ) )
 			{
 				$arrResponse	= [];
 				$arrPostData	= [
