@@ -60,6 +60,25 @@ class CMailSender extends CMsgSenderConst
 		return $bRet;
 	}
 
+	//
+	//	Set services url
+	//
+	public function SetServiceCCUrl( $sUrl )
+	{
+		//
+		//	sUrl	- [in] string	The new services url
+		//	RETURN	- boolean
+		//
+		$bRet	= false;
+
+		if ( CLib::IsExistingString( $sUrl ) )
+		{
+			$bRet = true;
+			$this->m_sServiceCCUrl = $sUrl;
+		}
+
+		return $bRet;
+	}
 
 	//
 	//	Set services calling timeout
